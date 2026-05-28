@@ -1,43 +1,12 @@
 "use client";
 
 import { useState, useRef } from "react";
-const PROMPT_TEMPLATE = `You are an expert developer who writes concise, accurate AGENTS.md files for AI coding agents.
-
-Given the following repository context, generate an AGENTS.md file. Include ONLY sections that are relevant and have real information from the repo. Do not invent or guess at sections you have no evidence for.
-
-Possible sections (include only relevant ones):
-- Installation / Setup
-- Coding/Development Guidelines
-- Executable Commands
-- Folder Structure
-- Testing Instructions
-- Linting
-- Deployment
-- PR Instructions
-- Do-Not Rules
-- Styling Guide
-
-Rules:
-- Maximum 200 lines total
-- Be specific, not generic — use actual commands, paths, and patterns from the repo
-- Use markdown formatting with ## section headers
-- Start with a one-line description of what the repo does
-- Only include sections with real, extracted information
-- For commands, use code blocks
-- Keep each section tight — no padding or filler
-
-Repository context:
-CONTEXT_PLACEHOLDER
-
-Output ONLY the AGENTS.md content, no preamble.`;
 
 export default function Home() {
   const [url, setUrl] = useState("");
   const [githubToken, setGithubToken] = useState("");
   const [showGithubToken, setShowGithubToken] = useState(false);
-  const [anthropicKey, setAnthropicKey] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loadingStage, setLoadingStage] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [repoName, setRepoName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,10 +14,8 @@ export default function Home() {
   const [usage, setUsage] = useState<{ inputTokens: number; outputTokens: number } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const canGenerate = url.trim() && anthropicKey.trim() && !loading;
-
   async function handleGenerate() {
-    if (!canGenerate) return;
+    if (!url.trim() || loading) return;
     setLoading(true);
     setResult(null);
     setError(null);
@@ -56,9 +23,7 @@ export default function Home() {
     setUsage(null);
 
     try {
-      // Step 1: fetch repo context server-side (handles GitHub API, CORS, rate limits)
-      setLoadingStage("Scanning repository…");
-      const githubRes = await fetch("/api/github", {
+      const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -66,53 +31,18 @@ export default function Home() {
           token: githubToken.trim() || undefined,
         }),
       });
-      const githubData = await githubRes.json();
-      if (!githubRes.ok) {
-        setError(githubData.error || "Failed to fetch repository");
-        return;
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Something went wrong");
+      } else {
+        setResult(data.agentsMd);
+        setRepoName(data.repo);
+        if (data.usage) setUsage(data.usage);
       }
-
-      // Step 2: call Anthropic Messages API directly from browser — no server key needed
-      setLoadingStage("Generating AGENTS.md…");
-      const prompt = PROMPT_TEMPLATE.replace("CONTEXT_PLACEHOLDER", githubData.context);
-      const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": anthropicKey.trim(),
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 3_000,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
-
-      if (!anthropicRes.ok) {
-        const errData = await anthropicRes.json().catch(() => ({}));
-        throw new Error(errData?.error?.message || `Anthropic API error ${anthropicRes.status}`);
-      }
-
-      const message = await anthropicRes.json();
-      const agentsMd =
-        message.content[0]?.type === "text" ? message.content[0].text : "";
-      const lines = agentsMd.split("\n");
-      const truncated = lines.length > 200 ? lines.slice(0, 200).join("\n") : agentsMd;
-
-      setResult(truncated);
-      setRepoName(githubData.repo);
-      setUsage({
-        inputTokens: message.usage.input_tokens,
-        outputTokens: message.usage.output_tokens,
-      });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Something went wrong";
-      setError(msg);
+    } catch {
+      setError("Network error — please try again");
     } finally {
       setLoading(false);
-      setLoadingStage("");
     }
   }
 
@@ -152,60 +82,41 @@ export default function Home() {
             Generate AGENTS.md for any repo
           </h1>
           <p className="text-neutral-400 text-base leading-relaxed">
-            Paste a GitHub URL. We&apos;ll scan the repo and produce a concise
-            AGENTS.md your AI coding agent can actually use. Bring your own
-            Anthropic key — it never leaves your browser.
+            Paste a GitHub URL and get a concise AGENTS.md your AI coding agent
+            can actually use — installation, commands, testing, linting, and more.
           </p>
         </div>
 
         {/* Input */}
         <div className="space-y-3 mb-6">
-          {/* Repo URL */}
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-            placeholder="https://github.com/owner/repo"
-            className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-3 text-sm font-mono placeholder-neutral-600 focus:outline-none focus:border-neutral-500 transition-colors"
-          />
-
-          {/* Anthropic key — always visible, required */}
-          <div>
-            <label className="block text-xs text-neutral-500 mb-1.5">
-              Anthropic API key{" "}
-              <span className="text-neutral-700">(required — stays in your browser)</span>
-            </label>
+          <div className="flex gap-3">
             <input
-              type="password"
-              value={anthropicKey}
-              onChange={(e) => setAnthropicKey(e.target.value)}
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-              placeholder="sk-ant-..."
-              className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-3 text-sm font-mono placeholder-neutral-600 focus:outline-none focus:border-neutral-500 transition-colors"
+              placeholder="https://github.com/owner/repo"
+              className="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-3 text-sm font-mono placeholder-neutral-600 focus:outline-none focus:border-neutral-500 transition-colors"
             />
+            <button
+              onClick={handleGenerate}
+              disabled={loading || !url.trim()}
+              className="px-5 py-3 bg-white text-black text-sm font-medium rounded-lg hover:bg-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Scanning
+                </span>
+              ) : (
+                "Generate"
+              )}
+            </button>
           </div>
 
-          {/* Generate button */}
-          <button
-            onClick={handleGenerate}
-            disabled={!canGenerate}
-            className="w-full py-3 bg-white text-black text-sm font-medium rounded-lg hover:bg-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                {loadingStage || "Working…"}
-              </span>
-            ) : (
-              "Generate AGENTS.md"
-            )}
-          </button>
-
-          {/* GitHub token (optional, collapsed) */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowGithubToken(!showGithubToken)}
@@ -213,10 +124,7 @@ export default function Home() {
             >
               <svg
                 className={`w-3 h-3 transition-transform ${showGithubToken ? "rotate-90" : ""}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
@@ -247,9 +155,7 @@ export default function Home() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-sm text-neutral-400">
-                  <span className="text-white font-mono">{repoName}</span>
-                </span>
+                <span className="text-white font-mono text-sm">{repoName}</span>
                 <span className="text-xs text-neutral-600 font-mono">
                   {lineCount} / 200 lines
                 </span>
@@ -308,26 +214,18 @@ export default function Home() {
           </div>
         )}
 
-        {/* Empty state */}
         {!result && !loading && !error && (
           <div className="border border-dashed border-neutral-800 rounded-lg p-8 text-center">
-            <p className="text-sm text-neutral-600 font-mono">
-              AGENTS.md will appear here
-            </p>
+            <p className="text-sm text-neutral-600 font-mono">AGENTS.md will appear here</p>
             <p className="text-xs text-neutral-700 mt-2">
               Install · Commands · Folder Structure · Testing · Linting · Deployment · PR rules
             </p>
           </div>
         )}
 
-        {/* Footer */}
         <footer className="mt-16 pt-8 border-t border-neutral-900 flex items-center justify-between">
-          <span className="text-xs text-neutral-700">
-            Powered by Claude Sonnet · Your key never touches our server
-          </span>
-          <span className="text-xs text-neutral-700">
-            Max 200 lines · ~$0.07 ceiling
-          </span>
+          <span className="text-xs text-neutral-700">Powered by Claude Sonnet</span>
+          <span className="text-xs text-neutral-700">Max 200 lines · ~$0.07 ceiling</span>
         </footer>
       </div>
     </main>
