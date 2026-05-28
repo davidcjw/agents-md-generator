@@ -3,11 +3,54 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+// Hard cap on total repo context sent to Claude.
+// ~6 000 chars ≈ 1 500 tokens for file content; prompt overhead adds ~800 more.
+// Absolute ceiling: ~2 300 input tokens + 1 500 output tokens ≈ $0.03 worst-case.
+const MAX_CONTEXT_CHARS = 24_000;
+
+// Per-file char budgets (trimmed before the aggregate cap is applied)
+const FILE_CHAR_LIMITS: Record<string, number> = {
+  "README.md": 6_000,
+  "readme.md": 6_000,
+  "CONTRIBUTING.md": 3_000,
+  "contributing.md": 3_000,
+};
+const DEFAULT_FILE_CHAR_LIMIT = 2_000;
+
+// Files ordered by signal value — we fill the budget in this order.
+const PRIORITY_FILES = [
+  "README.md",
+  "readme.md",
+  "package.json",
+  "pyproject.toml",
+  "go.mod",
+  "Cargo.toml",
+  "CONTRIBUTING.md",
+  "contributing.md",
+  "Makefile",
+  ".eslintrc.json",
+  ".eslintrc.js",
+  ".eslintrc.cjs",
+  ".prettierrc",
+  ".prettierrc.json",
+  ".prettierrc.js",
+  "jest.config.js",
+  "jest.config.ts",
+  "vitest.config.ts",
+  "vitest.config.js",
+  "Dockerfile",
+  "docker-compose.yml",
+  "docker-compose.yaml",
+  ".github/PULL_REQUEST_TEMPLATE.md",
+  "requirements.txt",
+  "AGENTS.md",
+  "CLAUDE.md",
+];
+
 interface GitHubFile {
   name: string;
   path: string;
   type: string;
-  download_url?: string;
 }
 
 function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
@@ -29,7 +72,6 @@ async function fetchGitHubFile(
     "User-Agent": "agents-md-generator",
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
-
   const res = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
     { headers }
@@ -48,7 +90,6 @@ async function fetchRepoTree(
     "User-Agent": "agents-md-generator",
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
-
   const res = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/`,
     { headers }
@@ -67,7 +108,6 @@ async function fetchWorkflows(
     "User-Agent": "agents-md-generator",
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
-
   const res = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/.github/workflows`,
     { headers }
@@ -76,17 +116,17 @@ async function fetchWorkflows(
   const files: GitHubFile[] = await res.json();
   if (!Array.isArray(files)) return null;
 
-  const workflows: string[] = [];
-  for (const f of files.slice(0, 3)) {
+  const snippets: string[] = [];
+  for (const f of files.slice(0, 2)) {
     const content = await fetchGitHubFile(
       owner,
       repo,
       `.github/workflows/${f.name}`,
       token
     );
-    if (content) workflows.push(`## ${f.name}\n${content.slice(0, 1000)}`);
+    if (content) snippets.push(`## ${f.name}\n${content.slice(0, 800)}`);
   }
-  return workflows.join("\n\n") || null;
+  return snippets.join("\n\n") || null;
 }
 
 export async function POST(req: NextRequest) {
@@ -106,67 +146,58 @@ export async function POST(req: NextRequest) {
 
   const { owner, repo } = parsed;
 
-  const filesToFetch = [
-    "README.md",
-    "readme.md",
-    "CONTRIBUTING.md",
-    "contributing.md",
-    "package.json",
-    "pyproject.toml",
-    "requirements.txt",
-    "Cargo.toml",
-    "go.mod",
-    "Makefile",
-    ".eslintrc.json",
-    ".eslintrc.js",
-    ".prettierrc",
-    ".prettierrc.json",
-    "jest.config.js",
-    "jest.config.ts",
-    "vitest.config.ts",
-    "vitest.config.js",
-    "Dockerfile",
-    "docker-compose.yml",
-    ".github/PULL_REQUEST_TEMPLATE.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "CODEBASE.md",
-  ];
-
-  const fetchedFiles: Record<string, string> = {};
-
+  // Fetch all candidate files in parallel
+  const rawFiles: Record<string, string> = {};
   await Promise.all(
-    filesToFetch.map(async (path) => {
+    PRIORITY_FILES.map(async (path) => {
+      const limit = FILE_CHAR_LIMITS[path] ?? DEFAULT_FILE_CHAR_LIMIT;
       const content = await fetchGitHubFile(owner, repo, path, token);
-      if (content) fetchedFiles[path] = content.slice(0, 3000);
+      if (content) rawFiles[path] = content.slice(0, limit);
     })
   );
 
-  if (fetchedFiles["AGENTS.md"]) {
+  if (rawFiles["AGENTS.md"]) {
     return NextResponse.json(
       { error: "This repository already has an AGENTS.md file." },
       { status: 400 }
     );
   }
 
-  const rootFiles = await fetchRepoTree(owner, repo, token);
+  // Build context respecting the aggregate character budget
+  const [rootFiles, workflows] = await Promise.all([
+    fetchRepoTree(owner, repo, token),
+    fetchWorkflows(owner, repo, token),
+  ]);
+
   const folderStructure = Array.isArray(rootFiles)
     ? rootFiles.map((f) => `${f.type === "dir" ? "/" : " "}${f.name}`).join("\n")
     : "";
-
-  const workflows = await fetchWorkflows(owner, repo, token);
 
   const contextParts: string[] = [
     `Repository: ${owner}/${repo}`,
     `Root structure:\n${folderStructure}`,
   ];
+  let charBudget = MAX_CONTEXT_CHARS - folderStructure.length - 100;
 
-  for (const [path, content] of Object.entries(fetchedFiles)) {
-    contextParts.push(`\n--- ${path} ---\n${content}`);
+  for (const path of PRIORITY_FILES) {
+    const content = rawFiles[path];
+    if (!content) continue;
+    const entry = `\n--- ${path} ---\n${content}`;
+    if (entry.length > charBudget) {
+      // Include a truncated slice rather than nothing
+      const partial = entry.slice(0, charBudget);
+      contextParts.push(partial + "\n[truncated]");
+      charBudget = 0;
+      break;
+    }
+    contextParts.push(entry);
+    charBudget -= entry.length;
+    if (charBudget <= 0) break;
   }
 
-  if (workflows) {
-    contextParts.push(`\n--- .github/workflows ---\n${workflows}`);
+  if (workflows && charBudget > 200) {
+    const entry = `\n--- .github/workflows ---\n${workflows}`;
+    contextParts.push(entry.slice(0, charBudget));
   }
 
   const context = contextParts.join("\n");
@@ -203,7 +234,7 @@ Output ONLY the AGENTS.md content, no preamble.`;
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 4096,
+    max_tokens: 3_000,
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -214,5 +245,12 @@ Output ONLY the AGENTS.md content, no preamble.`;
   const truncated =
     lines.length > 200 ? lines.slice(0, 200).join("\n") : agentsMd;
 
-  return NextResponse.json({ agentsMd: truncated, repo: `${owner}/${repo}` });
+  return NextResponse.json({
+    agentsMd: truncated,
+    repo: `${owner}/${repo}`,
+    usage: {
+      inputTokens: message.usage.input_tokens,
+      outputTokens: message.usage.output_tokens,
+    },
+  });
 }

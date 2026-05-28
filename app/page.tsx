@@ -11,6 +11,7 @@ export default function Home() {
   const [repoName, setRepoName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [usage, setUsage] = useState<{ inputTokens: number; outputTokens: number } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   async function handleGenerate() {
@@ -19,6 +20,7 @@ export default function Home() {
     setResult(null);
     setError(null);
     setRepoName(null);
+    setUsage(null);
 
     try {
       const res = await fetch("/api/generate", {
@@ -32,6 +34,7 @@ export default function Home() {
       } else {
         setResult(data.agentsMd);
         setRepoName(data.repo);
+        if (data.usage) setUsage(data.usage);
       }
     } catch {
       setError("Network error — please try again");
@@ -159,6 +162,11 @@ export default function Home() {
                 <span className="text-xs text-neutral-600 font-mono">
                   {lineCount} / 200 lines
                 </span>
+                {usage && (
+                  <span className="text-xs text-neutral-700 font-mono" title={`${usage.inputTokens} in / ${usage.outputTokens} out`}>
+                    ~${(((usage.inputTokens * 3) + (usage.outputTokens * 15)) / 1_000_000).toFixed(4)}
+                  </span>
+                )}
               </div>
               <div className="flex gap-2">
                 <button
