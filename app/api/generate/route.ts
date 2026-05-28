@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// Client is instantiated per-request so it can accept a user-provided key
 
 // Hard cap on total repo context sent to Claude.
 // ~6 000 chars ≈ 1 500 tokens for file content; prompt overhead adds ~800 more.
@@ -130,7 +130,18 @@ async function fetchWorkflows(
 }
 
 export async function POST(req: NextRequest) {
-  const { url, token } = await req.json();
+  try {
+  const { url, token, anthropicKey } = await req.json();
+  const apiKey = anthropicKey || process.env.ANTHROPIC_API_KEY;
+
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "No Anthropic API key configured. Set ANTHROPIC_API_KEY in Vercel environment variables, or provide it in the request." },
+      { status: 500 }
+    );
+  }
+
+  const client = new Anthropic({ apiKey });
 
   if (!url) {
     return NextResponse.json({ error: "URL is required" }, { status: 400 });
@@ -253,4 +264,8 @@ Output ONLY the AGENTS.md content, no preamble.`;
       outputTokens: message.usage.output_tokens,
     },
   });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

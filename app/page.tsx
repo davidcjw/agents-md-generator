@@ -6,6 +6,8 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [token, setToken] = useState("");
   const [showToken, setShowToken] = useState(false);
+  const [anthropicKey, setAnthropicKey] = useState("");
+  const [showAnthropicKey, setShowAnthropicKey] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [repoName, setRepoName] = useState<string | null>(null);
@@ -26,7 +28,11 @@ export default function Home() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim(), token: token.trim() || undefined }),
+        body: JSON.stringify({
+          url: url.trim(),
+          token: token.trim() || undefined,
+          anthropicKey: anthropicKey.trim() || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -139,6 +145,34 @@ export default function Home() {
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="ghp_..."
+              className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-3 text-sm font-mono placeholder-neutral-600 focus:outline-none focus:border-neutral-500 transition-colors"
+            />
+          )}
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowAnthropicKey(!showAnthropicKey)}
+              className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors flex items-center gap-1"
+            >
+              <svg
+                className={`w-3 h-3 transition-transform ${showAnthropicKey ? "rotate-90" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+              Override Anthropic API key (optional)
+            </button>
+          </div>
+
+          {showAnthropicKey && (
+            <input
+              type="password"
+              value={anthropicKey}
+              onChange={(e) => setAnthropicKey(e.target.value)}
+              placeholder="sk-ant-..."
               className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-3 text-sm font-mono placeholder-neutral-600 focus:outline-none focus:border-neutral-500 transition-colors"
             />
           )}
