@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AGENTS.md Generator
 
-## Getting Started
+Generate an `AGENTS.md` file for any public GitHub repository using Claude AI.
 
-First, run the development server:
+**Live:** [agents-md-generator.vercel.app](https://agents-md-generator.vercel.app)
+
+## What it does
+
+Paste a GitHub URL → get a concise, accurate `AGENTS.md` (≤200 lines) covering only the sections that have real evidence in the repo:
+
+- Installation / Setup
+- Executable Commands
+- Folder Structure
+- Testing Instructions
+- Linting
+- Deployment
+- PR Instructions
+- Coding Guidelines
+- Do-Not Rules
+- Styling Guide
+
+Output is editable in the browser and can be copied or downloaded.
+
+## How it works
+
+1. `/api/github` fetches key files from the repo in priority order (README → package.json → lint/test configs → CI workflows etc.), capped at 24k characters
+2. The context is sent to `claude-haiku-4-5-20251001` with a structured prompt
+3. Claude generates only sections backed by real evidence — no generic filler
+4. Output is hard-capped to 200 lines
+
+**Cost ceiling: ~$0.02 per generation** (Haiku: $0.80/MTok input, $4.00/MTok output)
+
+## Self-hosting
+
+### Prerequisites
+
+- Node.js 18+
+- An [Anthropic API key](https://console.anthropic.com/)
+
+### Local development
 
 ```bash
+git clone https://github.com/davidcjw/agents-md-generator
+cd agents-md-generator
+npm install
+cp .env.example .env.local   # add your ANTHROPIC_API_KEY
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Deploy to Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/davidcjw/agents-md-generator)
 
-## Learn More
+Set the `ANTHROPIC_API_KEY` environment variable in your Vercel project settings.
 
-To learn more about Next.js, take a look at the following resources:
+## Private repos
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Expand "Private repo? Add GitHub token" in the UI and provide a GitHub personal access token with `repo` scope.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech stack
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js](https://nextjs.org) (App Router)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Anthropic SDK](https://github.com/anthropic-ai/sdk-python) — `claude-haiku-4-5-20251001`
