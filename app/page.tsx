@@ -164,7 +164,7 @@ export default function Home() {
                     className="text-xs text-neutral-700 font-mono"
                     title={`${usage.inputTokens} in / ${usage.outputTokens} out`}
                   >
-                    ~${(((usage.inputTokens * 3) + (usage.outputTokens * 15)) / 1_000_000).toFixed(4)}
+                    ~${(((usage.inputTokens * 0.8) + (usage.outputTokens * 4)) / 1_000_000).toFixed(4)}
                   </span>
                 )}
               </div>
@@ -224,8 +224,8 @@ export default function Home() {
         )}
 
         <footer className="mt-16 pt-8 border-t border-neutral-900 flex items-center justify-between">
-          <span className="text-xs text-neutral-700">Powered by Claude Sonnet</span>
-          <span className="text-xs text-neutral-700">Max 200 lines · ~$0.07 ceiling</span>
+          <span className="text-xs text-neutral-700">Powered by Claude Haiku</span>
+          <span className="text-xs text-neutral-700">Max 200 lines · ~$0.02 ceiling</span>
         </footer>
       </div>
     </main>
