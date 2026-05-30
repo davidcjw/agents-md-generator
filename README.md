@@ -1,5 +1,7 @@
 # AGENTS.md Generator
 
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
 Generate an `AGENTS.md` file for any public GitHub repository using Claude AI.
 
 **Live:** [agents-md-generator.vercel.app](https://agents-md-generator.vercel.app)
@@ -64,3 +66,23 @@ Expand "Private repo? Add GitHub token" in the UI and provide a GitHub personal 
 - [Next.js](https://nextjs.org) (App Router)
 - [Tailwind CSS](https://tailwindcss.com)
 - [Anthropic SDK](https://github.com/anthropic-ai/sdk-python) — `claude-haiku-4-5-20251001`
+
+## Contributing
+
+Contributions are welcome! Please open an issue first to discuss what you'd like to change.
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'feat: describe change'`)
+4. Push and open a pull request
+
+Please make sure tests pass before submitting a PR.
+
+## Code of Conduct
+
+This project follows the [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
+By participating you agree to uphold a welcoming, harassment-free environment.
+
+## License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.
