@@ -205,7 +205,8 @@ export default function Home() {
               ref={textareaRef}
               value={result}
               onChange={(e) => setResult(e.target.value)}
-              className="w-full h-[60vh] bg-neutral-900 border border-neutral-700 rounded-lg px-5 py-4 text-sm font-mono text-neutral-200 leading-relaxed focus:outline-none focus:border-neutral-500 resize-none transition-colors"
+              className="w-full h-[60vh] bg-neutral-900 border border-neutral-700 rounded-lg px-5 py-4 text-sm text-neutral-200 leading-relaxed focus:outline-none focus:border-neutral-500 resize-none transition-colors"
+              style={{ fontFamily: 'ui-monospace, Menlo, Monaco, Consolas, "Courier New", monospace' }}
               spellCheck={false}
             />
             <p className="text-xs text-neutral-600">
