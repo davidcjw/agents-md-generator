@@ -159,14 +159,6 @@ export default function Home() {
                 <span className="text-xs text-neutral-600 font-mono">
                   {lineCount} / 200 lines
                 </span>
-                {usage && (
-                  <span
-                    className="text-xs text-neutral-700 font-mono"
-                    title={`${usage.inputTokens} in / ${usage.outputTokens} out`}
-                  >
-                    ~${(((usage.inputTokens * 0.8) + (usage.outputTokens * 4)) / 1_000_000).toFixed(4)}
-                  </span>
-                )}
               </div>
               <div className="flex gap-2">
                 <button
@@ -226,7 +218,7 @@ export default function Home() {
 
         <footer className="mt-16 pt-8 border-t border-neutral-900 flex items-center justify-between">
           <span className="text-xs text-neutral-700">Powered by Claude Haiku</span>
-          <span className="text-xs text-neutral-700">Max 200 lines · ~$0.02 ceiling</span>
+          <span className="text-xs text-neutral-700">Max 200 lines</span>
         </footer>
       </div>
     </main>
