@@ -1,10 +1,11 @@
 # AGENTS.md Generator
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![AgentReady Score](https://agentready.davidcjw.com/api/badge/davidcjw/agents-md-generator)](https://agentready.davidcjw.com/results/davidcjw/agents-md-generator)
 
 Generate an `AGENTS.md` file for any public GitHub repository using Claude AI.
 
-**Live:** [agents-md-generator.vercel.app](https://agents-md-generator.vercel.app)
+**Live:** [agents-md-generator.davidcjw.com](https://agents-md-generator.davidcjw.com)
 
 ## What it does
 
