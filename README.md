@@ -3,7 +3,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![AgentReady Score](https://agentready.davidcjw.com/api/badge/davidcjw/agents-md-generator)](https://agentready.davidcjw.com/results/davidcjw/agents-md-generator)
 
-Generate an `AGENTS.md` file for any public GitHub repository using Claude AI.
+[`AGENTS.md`](https://agents.md) is the emerging standard for telling AI coding agents how to work in your repo — and this tool generates one for any public GitHub repository in seconds, using Claude AI.
 
 **Live:** [agents-md-generator.davidcjw.com](https://agents-md-generator.davidcjw.com)
 
@@ -30,8 +30,6 @@ Output is editable in the browser and can be copied or downloaded.
 2. The context is sent to `claude-haiku-4-5-20251001` with a structured prompt
 3. Claude generates only sections backed by real evidence — no generic filler
 4. Output is hard-capped to 200 lines
-
-**Cost ceiling: ~$0.02 per generation** (Haiku: $0.80/MTok input, $4.00/MTok output)
 
 ## Self-hosting
 
