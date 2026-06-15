@@ -7,6 +7,10 @@
 
 **Live:** [agents-md-generator.davidcjw.com](https://agents-md-generator.davidcjw.com)
 
+<p align="center">
+  <img src="docs/screenshot.png" alt="AGENTS.md Generator — paste a GitHub URL, get an AGENTS.md" width="720">
+</p>
+
 ## What it does
 
 Paste a GitHub URL → get a concise, accurate `AGENTS.md` (≤200 lines) covering only the sections that have real evidence in the repo:
