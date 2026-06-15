@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 // Client is instantiated per-request so it can accept a user-provided key
 
@@ -131,6 +132,16 @@ async function fetchWorkflows(
 
 export async function POST(req: NextRequest) {
   try {
+  // Throttle abuse before any (paid) Claude work — protects the server-side
+  // ANTHROPIC_API_KEY fallback from being looped to drain the budget.
+  const rl = rateLimit(`generate:${clientIp(req)}`, { limit: 10, windowMs: 60_000 });
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many requests. Please slow down." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
+    );
+  }
+
   const { url, token, anthropicKey } = await req.json();
   const apiKey = anthropicKey || process.env.ANTHROPIC_API_KEY;
 

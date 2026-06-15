@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 const MAX_CONTEXT_CHARS = 24_000;
 
@@ -125,6 +126,15 @@ async function fetchWorkflows(
 
 export async function POST(req: NextRequest) {
   try {
+    // Throttle abuse before fanning out a burst of GitHub API requests per call.
+    const rl = rateLimit(`github:${clientIp(req)}`, { limit: 15, windowMs: 60_000 });
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: "Too many requests. Please slow down." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
+      );
+    }
+
     const { url, token } = await req.json();
 
     if (!url) {
