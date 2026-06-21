@@ -1,26 +1,35 @@
+/* dragonfly-ds fonts must precede Tailwind so the Google Fonts @import stays
+   ahead of all emitted rules (CSS requires @import first). */
+@import "./ds/styles/fonts.css";
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* dragonfly-ds tokens (vendored from ~/code/design-systems/dragonfly-ds) */
+@import "./ds/styles/tokens.css";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-canvas: var(--df-canvas);
+  --color-ink: var(--df-ink);
+  --color-muted: var(--df-muted);
+  --color-line: var(--df-line);
+  --color-accent: var(--df-accent);
+  --font-sans: var(--df-font-sans);
+  --font-mono: var(--df-font-mono);
+  --font-serif: var(--df-font-serif);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background-color: var(--df-canvas);
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--df-canvas);
+  color: var(--df-ink);
+  font-family: var(--df-font-sans);
+  font-weight: var(--df-weight-regular);
+}
+
+::selection {
+  background-color: var(--df-accent);
+  color: var(--df-canvas);
 }

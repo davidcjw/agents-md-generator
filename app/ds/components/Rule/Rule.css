@@ -1,0 +1,5 @@
+.df-rule { display: block; border: 0; }
+.df-rule--h { width: 100%; border-top: var(--df-border-width) solid var(--df-line); }
+.df-rule--v { align-self: stretch; min-height: 1em; border-left: var(--df-border-width) solid var(--df-line); }
+.df-rule--strong.df-rule--h { border-top-color: var(--df-line-strong); }
+.df-rule--strong.df-rule--v { border-left-color: var(--df-line-strong); }

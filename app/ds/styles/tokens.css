@@ -1,0 +1,62 @@
+/* ============================================================
+   dragonfly-ds — design tokens
+   Extracted from dragonfly.xyz.
+   A dark editorial system: black canvas, off-white text, faint
+   10%-white hairline grid lines, a single vivid orange-red
+   accent, a three-face type system (roman serif display +
+   grotesque sans + mono), huge tight-tracked display, sharp
+   corners, on a 12px grid.
+   ============================================================ */
+
+:root {
+  /* — Core color (dark canvas, light foreground) — */
+  --df-canvas: #000000;   /* page background */
+  --df-ink: #f2f2f2;      /* primary text / foreground (rgb 242) */
+  --df-muted: #7d7d7d;    /* secondary text (rgb 125) */
+  --df-line: rgba(242, 242, 242, 0.1);   /* the signature hairline rule/border */
+  --df-line-strong: rgba(242, 242, 242, 0.24);
+  --df-fill: rgba(242, 242, 242, 0.06);  /* faint inset panel fill */
+
+  /* — Accent — */
+  --df-accent: #fa4c14;   /* vivid orange-red (rgb 250,76,20) */
+  --df-magenta: #ec39b6;  /* rare highlight */
+  --df-blue: #5014fa;     /* rare highlight */
+
+  /* — Typography (three licensed faces → free substitutes) — */
+  --df-font-serif: "FK Roman Standard", "Fraunces", Georgia, serif;
+  --df-font-sans: "NON Natural Grotesk", "Inter", system-ui, sans-serif;
+  --df-font-mono: "NON Natural Mono", "JetBrains Mono", ui-monospace, monospace;
+  --df-fs-mega: clamp(80px, 13vw, 164px); /* hero / logo display */
+  --df-fs-display: 91px;   /* spotlight names */
+  --df-fs-h: 42px;
+  --df-fs-lead: 25px;
+  --df-fs-body: 16px;      /* base */
+  --df-fs-micro: 10px;     /* mono labels / section numbers */
+  --df-weight-light: 300;
+  --df-weight-regular: 400;
+  --df-track-mega: -0.04em;  /* big display pulls in hard (-6.4px @164) */
+  --df-track-display: -0.018em;
+  --df-track-mono: 0.04em;   /* mono labels open up (+0.4px @10) */
+  --df-leading: 1.4;
+  --df-leading-tight: 1;
+
+  /* — Grid & space (12px module, sharp corners) — */
+  --df-module: 12px;
+  --df-gutter: 24px;
+  --df-border-width: 1px;
+  --df-border: var(--df-border-width) solid var(--df-line);
+  --df-radius: 4px;
+
+  /* — Motion — */
+  --df-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --df-dur: 180ms;
+}
+
+/* Optional full-surface reset for consumers who want the page look. */
+.df-surface-page {
+  background-color: var(--df-canvas);
+  color: var(--df-ink);
+  font-family: var(--df-font-sans);
+  font-weight: var(--df-weight-regular);
+  font-size: var(--df-fs-body);
+}

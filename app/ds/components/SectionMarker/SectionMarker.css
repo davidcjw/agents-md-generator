@@ -1,0 +1,13 @@
+.df-section {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+}
+.df-section__inner {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.df-section__num { display: block; }
+.df-section__label { display: block; letter-spacing: 0.12em; }

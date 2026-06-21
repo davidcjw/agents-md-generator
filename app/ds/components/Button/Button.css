@@ -1,0 +1,22 @@
+.df-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--df-radius);
+  white-space: nowrap;
+  line-height: 1;
+}
+.df-button.df-button--accent {
+  background-color: var(--df-accent);
+  border-color: var(--df-accent);
+  color: var(--df-canvas);
+}
+.df-button.df-button--accent:hover {
+  border-color: var(--df-accent);
+  opacity: 0.9;
+}
+.df-button.df-button--ghost:hover {
+  color: var(--df-accent);
+}

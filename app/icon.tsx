@@ -10,8 +10,9 @@ export default function Icon() {
         style={{
           width: 32,
           height: 32,
-          background: "#ffffff",
-          borderRadius: 6,
+          background: "#000000",
+          border: "1px solid rgba(242,242,242,0.24)",
+          borderRadius: 4,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -19,10 +20,10 @@ export default function Icon() {
       >
         <span
           style={{
-            fontFamily: "monospace",
-            fontWeight: 700,
-            fontSize: 20,
-            color: "#000000",
+            fontFamily: "Georgia, serif",
+            fontWeight: 600,
+            fontSize: 22,
+            color: "#fa4c14",
             lineHeight: 1,
           }}
         >

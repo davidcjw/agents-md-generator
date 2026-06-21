@@ -1,0 +1,11 @@
+.df-spotlight {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  text-decoration: none;
+  color: var(--df-ink);
+  transition: color var(--df-dur) var(--df-ease);
+}
+.df-spotlight__name { transition: color var(--df-dur) var(--df-ease); }
+.df-spotlight__meta { transform: translateY(-0.6em); white-space: nowrap; }
+a.df-spotlight:hover .df-spotlight__name { color: var(--df-accent); }

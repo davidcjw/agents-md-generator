@@ -1,6 +1,31 @@
 "use client";
 
 import { useState, useRef } from "react";
+import {
+  Display,
+  Text,
+  MonoLabel,
+  Button,
+  Rule,
+  SectionMarker,
+} from "./ds";
+
+const REPO_URL = "https://github.com/davidcjw/agents-md-generator";
+
+function GitHubMark({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z" />
+    </svg>
+  );
+}
 
 export default function Home() {
   const [url, setUrl] = useState("");
@@ -65,30 +90,62 @@ export default function Home() {
 
   const lineCount = result ? result.split("\n").length : 0;
 
-  return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white">
-      <div className="max-w-3xl mx-auto px-6 py-16">
-        {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-white rounded-sm flex items-center justify-center">
-              <span className="text-black font-mono font-bold text-sm">A</span>
-            </div>
-            <span className="font-mono text-sm text-neutral-400 tracking-widest uppercase">
-              agents.md
-            </span>
-          </div>
-          <h1 className="text-3xl font-semibold tracking-tight mb-3">
-            Generate AGENTS.md for any repo
-          </h1>
-          <p className="text-neutral-400 text-base leading-relaxed">
-            Paste a GitHub URL and get a concise AGENTS.md your AI coding agent
-            can actually use — installation, commands, testing, linting, and more.
-          </p>
-        </div>
+  const fieldClass =
+    "w-full bg-[var(--df-fill)] border border-[var(--df-line)] rounded-[var(--df-radius)] px-4 py-3 text-sm font-mono text-[var(--df-ink)] placeholder-[var(--df-muted)] focus:outline-none focus:border-[var(--df-accent)] transition-colors";
 
-        {/* Input */}
-        <div className="space-y-3 mb-6">
+  return (
+    <main className="flex-1 w-full">
+      {/* top bar */}
+      <header className="border-b border-[var(--df-line)]">
+        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span
+              className="font-serif text-[var(--df-accent)] text-xl leading-none"
+              aria-hidden="true"
+            >
+              A
+            </span>
+            <MonoLabel tone="ink">AGENTS.md</MonoLabel>
+          </div>
+          <Button
+            href={REPO_URL}
+            target="_blank"
+            rel="noreferrer"
+            variant="outline"
+          >
+            <span className="inline-flex items-center gap-2 whitespace-nowrap">
+              <GitHubMark />
+              Star on GitHub
+            </span>
+          </Button>
+        </div>
+      </header>
+
+      <div className="max-w-3xl mx-auto px-6 w-full">
+        {/* hero */}
+        <section className="pt-20 pb-12">
+          <MonoLabel tone="accent" className="block mb-6">
+            Generator
+          </MonoLabel>
+          <Display as="h1" size="h" className="mb-5 max-w-2xl">
+            Generate <span className="text-[var(--df-accent)]">AGENTS.md</span>{" "}
+            for any repo
+          </Display>
+          <Text
+            as="p"
+            face="sans"
+            size="lead"
+            tone="muted"
+            className="max-w-xl"
+          >
+            Paste a GitHub URL and get a concise, evidence-based AGENTS.md your
+            AI coding agent can actually use — install, commands, testing,
+            linting and more.
+          </Text>
+        </section>
+
+        {/* input */}
+        <section className="space-y-3 pb-2">
           <div className="flex gap-3">
             <input
               type="url"
@@ -96,41 +153,66 @@ export default function Home() {
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
               placeholder="https://github.com/owner/repo"
-              className="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-3 text-sm font-mono placeholder-neutral-600 focus:outline-none focus:border-neutral-500 transition-colors"
+              className={`flex-1 ${fieldClass}`}
             />
-            <button
+            <Button
+              as="button"
+              variant="accent"
               onClick={handleGenerate}
               disabled={loading || !url.trim()}
-              className="px-5 py-3 bg-white text-black text-sm font-medium rounded-lg hover:bg-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              style={{
+                opacity: loading || !url.trim() ? 0.4 : 1,
+                cursor: loading || !url.trim() ? "not-allowed" : "pointer",
+              }}
             >
               {loading ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                  <svg
+                    className="animate-spin h-3.5 w-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
                   </svg>
                   Scanning
                 </span>
               ) : (
                 "Generate"
               )}
-            </button>
+            </Button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowGithubToken(!showGithubToken)}
-              className="text-xs text-neutral-600 hover:text-neutral-400 transition-colors flex items-center gap-1"
+          <button
+            onClick={() => setShowGithubToken(!showGithubToken)}
+            className="flex items-center gap-1.5 text-[var(--df-muted)] hover:text-[var(--df-ink)] transition-colors"
+          >
+            <svg
+              className={`w-3 h-3 transition-transform ${showGithubToken ? "rotate-90" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
             >
-              <svg
-                className={`w-3 h-3 transition-transform ${showGithubToken ? "rotate-90" : ""}`}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-              Private repo? Add GitHub token
-            </button>
-          </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+            <MonoLabel tone="inherit">Private repo? Add GitHub token</MonoLabel>
+          </button>
 
           {showGithubToken && (
             <input
@@ -138,58 +220,38 @@ export default function Home() {
               value={githubToken}
               onChange={(e) => setGithubToken(e.target.value)}
               placeholder="ghp_..."
-              className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-3 text-sm font-mono placeholder-neutral-600 focus:outline-none focus:border-neutral-500 transition-colors"
+              className={fieldClass}
             />
           )}
-        </div>
+        </section>
 
-        {/* Error */}
+        {/* error */}
         {error && (
-          <div className="mb-6 px-4 py-3 bg-red-950/50 border border-red-800/50 rounded-lg text-sm text-red-400">
-            {error}
+          <div className="mt-6 px-4 py-3 border border-[var(--df-accent)] rounded-[var(--df-radius)] bg-[rgba(250,76,20,0.08)]">
+            <Text face="mono" size="micro" tone="accent" caps>
+              {error}
+            </Text>
           </div>
         )}
 
-        {/* Result */}
+        {/* result */}
         {result && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
+          <section className="mt-10">
+            <SectionMarker number="02">Result</SectionMarker>
+            <div className="flex items-center justify-between mt-6 mb-3">
               <div className="flex items-center gap-3">
-                <span className="text-white font-mono text-sm">{repoName}</span>
-                <span className="text-xs text-neutral-600 font-mono">
-                  {lineCount} / 200 lines
-                </span>
+                <Text face="mono" size="micro" tone="ink">
+                  {repoName}
+                </Text>
+                <MonoLabel tone="muted">{lineCount} / 200 lines</MonoLabel>
               </div>
               <div className="flex gap-2">
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors"
-                >
-                  {copied ? (
-                    <>
-                      <svg className="w-3.5 h-3.5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                      Copy
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={handleDownload}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
+                <Button variant="outline" onClick={handleCopy}>
+                  {copied ? "Copied" : "Copy"}
+                </Button>
+                <Button variant="outline" onClick={handleDownload}>
                   Download
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -197,28 +259,46 @@ export default function Home() {
               ref={textareaRef}
               value={result}
               onChange={(e) => setResult(e.target.value)}
-              className="w-full h-[60vh] bg-neutral-900 border border-neutral-700 rounded-lg px-5 py-4 text-sm text-neutral-200 leading-relaxed focus:outline-none focus:border-neutral-500 resize-none transition-colors"
-              style={{ fontFamily: 'ui-monospace, Menlo, Monaco, Consolas, "Courier New", monospace' }}
+              className="w-full h-[60vh] bg-[var(--df-fill)] border border-[var(--df-line)] rounded-[var(--df-radius)] px-5 py-4 text-sm text-[var(--df-ink)] leading-relaxed focus:outline-none focus:border-[var(--df-accent)] resize-none transition-colors font-mono"
               spellCheck={false}
             />
-            <p className="text-xs text-neutral-600">
-              Output is editable — tweak before copying or downloading.
-            </p>
-          </div>
+            <MonoLabel tone="muted" className="block mt-2">
+              Output is editable — tweak before copying or downloading
+              {usage
+                ? ` · ${usage.inputTokens.toLocaleString()} in / ${usage.outputTokens.toLocaleString()} out`
+                : ""}
+            </MonoLabel>
+          </section>
         )}
 
+        {/* empty state */}
         {!result && !loading && !error && (
-          <div className="border border-dashed border-neutral-800 rounded-lg p-8 text-center">
-            <p className="text-sm text-neutral-600 font-mono">AGENTS.md will appear here</p>
-            <p className="text-xs text-neutral-700 mt-2">
-              Install · Commands · Folder Structure · Testing · Linting · Deployment · PR rules
-            </p>
+          <div className="mt-8 border border-[var(--df-line)] rounded-[var(--df-radius)] p-10 text-center">
+            <Text face="mono" size="micro" tone="muted" caps>
+              AGENTS.md will appear here
+            </Text>
+            <MonoLabel tone="muted" className="block mt-3">
+              Install · Commands · Structure · Testing · Linting · Deployment ·
+              PR rules
+            </MonoLabel>
           </div>
         )}
 
-        <footer className="mt-16 pt-8 border-t border-neutral-900 flex items-center justify-between">
-          <span className="text-xs text-neutral-700">Powered by Claude Haiku</span>
-          <span className="text-xs text-neutral-700">Max 200 lines</span>
+        {/* footer */}
+        <footer className="mt-20 pt-6 pb-10">
+          <Rule />
+          <div className="flex items-center justify-between pt-6">
+            <MonoLabel tone="muted">Powered by Claude Haiku</MonoLabel>
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-[var(--df-muted)] hover:text-[var(--df-accent)] transition-colors"
+            >
+              <GitHubMark />
+              <MonoLabel tone="inherit">GitHub</MonoLabel>
+            </a>
+          </div>
         </footer>
       </div>
     </main>

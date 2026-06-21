@@ -1,0 +1,15 @@
+.df-index-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 0;
+  margin: -0.5px;            /* collapse shared hairlines in a grid */
+  min-width: 0;
+}
+.df-index-cell__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

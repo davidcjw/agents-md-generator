@@ -1,0 +1,12 @@
+/* Typefaces — a three-face system.
+   dragonfly.xyz ships three LICENSED faces that can't be freely embedded:
+     • FK Roman Standard (Florian Karsten) — roman serif display
+     • NON Natural Grotesk (NON-Foundry)   — grotesque sans body
+     • NON Natural Mono   (NON-Foundry)    — mono labels
+   The token stacks name each real face first (so a licensed consumer gets it)
+   and fall back to the closest free substitutes, loaded here from Google Fonts:
+     • Fraunces      → serif display stand-in for FK Roman
+     • Inter         → grotesque stand-in for NON Natural Grotesk
+     • JetBrains Mono→ mono stand-in for NON Natural Mono
+   Swap in self-hosted @font-face for the genuine faces if licensed. */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap");
