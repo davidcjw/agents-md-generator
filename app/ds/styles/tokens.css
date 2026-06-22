@@ -21,6 +21,7 @@
   --df-accent: #fa4c14;   /* vivid orange-red (rgb 250,76,20) */
   --df-magenta: #ec39b6;  /* rare highlight */
   --df-blue: #5014fa;     /* rare highlight */
+  --df-gold: #dbb154;     /* star accent */
 
   /* — Typography (three licensed faces → free substitutes) — */
   --df-font-serif: "FK Roman Standard", "Fraunces", Georgia, serif;

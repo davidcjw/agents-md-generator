@@ -27,6 +27,25 @@ function GitHubMark({ className = "" }: { className?: string }) {
   );
 }
 
+function StarIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z" />
+    </svg>
+  );
+}
+
 export default function Home() {
   const [url, setUrl] = useState("");
   const [githubToken, setGithubToken] = useState("");
@@ -112,10 +131,13 @@ export default function Home() {
             target="_blank"
             rel="noreferrer"
             variant="outline"
+            aria-label="Star agents-md-generator on GitHub"
+            className="group"
           >
             <span className="inline-flex items-center gap-2 whitespace-nowrap">
               <GitHubMark />
-              Star on GitHub
+              Star
+              <StarIcon className="text-[var(--df-gold)] transition-transform group-hover:scale-110 group-hover:fill-[var(--df-gold)]" />
             </span>
           </Button>
         </div>
